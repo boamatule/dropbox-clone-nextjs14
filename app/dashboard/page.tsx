@@ -1,9 +1,11 @@
-import React from 'react'
+import DropZone from "@/components/DropZone";
 
 const Dashboard = () => {
-  return (
-    <div>Dashboard</div>
-  )
-}
+	return (
+		<div>
+			<DropZone />
+		</div>
+	);
+};
 
-export default Dashboard
+export default Dashboard;
