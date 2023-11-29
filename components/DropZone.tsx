@@ -1,9 +1,57 @@
 "use client";
-
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import DropZoneComponent from "react-dropzone";
+import { useUser } from "@clerk/nextjs";
+import { addDoc, collection, doc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { db, storage } from "@/firebase";
 
 const DropZone = () => {
+  const [loading, setLoading] = useState(false);
+  const { isLoaded, isSignedIn, user }= useUser();
+
+  const onDrop = (acceptedFiles: File[]) => {
+    acceptedFiles.forEach((file) => {
+      const reader = new FileReader();
+
+      reader.onabort = () => console.log("file reading was aborted");
+      reader.onerror = () => console.log("file reading has failed");
+      reader.onload = async () => {
+        await uploadPost(file);
+      };
+      reader.readAsArrayBuffer(file);
+    }
+  )}
+
+  const uploadPost = async (selectedFile: File) => {
+    if (loading) return;
+    if (!user) return;
+
+    setLoading(true);
+    // addDoc => users/userId/posts
+    const docRef = await addDoc(collection(db, "users", user.id, "files"), {
+      userId: user.id,
+      fileName: selectedFile.name,
+      fullName: user.fullName,
+      profileImage: user.imageUrl,
+      fileSize: selectedFile.size,
+      fileType: selectedFile.type,
+      createdAt: serverTimestamp(),
+    });
+
+    const imageRef = ref(storage, `users/${user.id}/files/${docRef.id}`);
+    
+    uploadBytes(imageRef, selectedFile).then(async (snapshot) => {
+      const downloadUrl = await getDownloadURL(imageRef);
+
+      await updateDoc(doc(db, "users", user.id, "files", docRef.id), {
+        downloadUrl: downloadUrl,
+      });
+    })
+    setLoading(false);
+  }
+
   // maz file size 20MB
   const maxSize = 20971520;
 
@@ -11,7 +59,7 @@ const DropZone = () => {
 		<DropZoneComponent
 			minSize={0}
 			maxSize={maxSize}
-			onDrop={(acceptedFiles) => console.log(acceptedFiles)}
+			onDrop={onDrop}
 		>
 			{({
 				getRootProps,
