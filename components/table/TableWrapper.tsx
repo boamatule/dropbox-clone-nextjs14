@@ -1,31 +1,31 @@
 "use client";
 
+import { db } from "@/firebase";
 import { FileType } from "@/typings";
 import { useUser } from "@clerk/nextjs";
+import { collection, orderBy, query } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import { useCollection } from "react-firebase-hooks/firestore";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
 import { DataTable } from "./Table";
 import { columns } from "./columns";
-import { useCollection } from "react-firebase-hooks/firestore";
-import { collection, orderBy, query } from "firebase/firestore";
-import { db } from "@/firebase";
 
 const TableWrapper = ({ skeletonFiles }: { skeletonFiles: FileType[] }) => {
 	const { user } = useUser();
 	const [initialFiles, setInitialFiles] = useState<FileType[]>([]);
 	const [sort, setSort] = useState<"asc" | "desc">("desc");
 
-	const [docs, loading, error] = useCollection(
-		user && 
-		query(
-			collection(db, "users", user.id, "files"),
-			orderBy("timestamp", sort)
-		)
+	const [docs] = useCollection(
+		user &&
+			query(
+				collection(db, "users", user.id, "files"),
+				orderBy("timestamp", sort),
+			),
 	);
 
 	useEffect(() => {
-		if(!docs) return;
+		if (!docs) return;
 		const files: FileType[] = docs.docs.map((doc) => ({
 			id: doc.id,
 			filename: doc.data().filename || doc.id,
@@ -60,8 +60,8 @@ const TableWrapper = ({ skeletonFiles }: { skeletonFiles: FileType[] }) => {
 						<div className="flex items-center space-x-4 p-5 w-full">
 							<Skeleton className="h-12 w-12" />
 							<Skeleton className="h-12 w-full" />
-							</div>
-							)}
+						</div>
+					)}
 				</div>
 			</div>
 		);
