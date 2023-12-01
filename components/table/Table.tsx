@@ -1,13 +1,6 @@
 "use client";
 
 import {
-	ColumnDef,
-	flexRender,
-	getCoreRowModel,
-	useReactTable,
-} from "@tanstack/react-table";
-
-import {
 	Table,
 	TableBody,
 	TableCell,
@@ -15,7 +8,14 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useAppStore } from "@/store/store";
 import { FileType } from "@/typings";
+import {
+	ColumnDef,
+	flexRender,
+	getCoreRowModel,
+	useReactTable,
+} from "@tanstack/react-table";
 import { PencilIcon, TrashIcon } from "lucide-react";
 import { Button } from "../ui/button";
 
@@ -34,6 +34,24 @@ export function DataTable<TData, TValue>({
 		getCoreRowModel: getCoreRowModel(),
 	});
 
+	const [setIsRenameModalOpen, setFileId, setFilename, setIsDeleteModalOpen] =
+		useAppStore(state => [
+			state.setIsRenameModalOpen,
+			state.setFileId,
+			state.setFilename,
+			state.setIsDeleteModalOpen,
+		]);
+
+	const openRenameModal = (fileId: string, filename: string) => {
+		setFileId(fileId);
+		setFilename(filename);
+		setIsRenameModalOpen(true);
+	};
+
+	const openDeleteModal = (fileId: string) => {
+		setFileId(fileId);
+		setIsDeleteModalOpen(true);
+	};
 	return (
 		<div className="rounded-md border">
 			<Table>
@@ -77,11 +95,10 @@ export function DataTable<TData, TValue>({
 											<p
 												className="underline items-center flex text-blue-500 hover:cursor-pointer"
 												onClick={() => {
-													console.log("Hello");
-													// openRenameModal(
-													//   (row.original as FileType).id,
-													//   (row.original as FileType).filename,
-													//   )
+													openRenameModal(
+														(row.original as FileType).id,
+														(row.original as FileType).filename,
+													);
 												}}
 											>
 												{cell.renderValue() as string}
@@ -97,7 +114,7 @@ export function DataTable<TData, TValue>({
 									<Button
 										variant={"outline"}
 										onClick={() => {
-											console.log("Wsup");
+											openDeleteModal((row.original as FileType).id);
 										}}
 									>
 										<TrashIcon size={20} />

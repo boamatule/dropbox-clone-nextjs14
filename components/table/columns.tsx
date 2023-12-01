@@ -57,7 +57,7 @@ export const columns: ColumnDef<FileType>[] = [
 				href={renderValue() as string}
 				target="_blank"
 				rel="noreferrer"
-				className="text-blue-500 underline hover:text-blue-600"
+				className="text-blue-500 underline hover:text-blue-600 hover:cursor-pointer"
 			>
 				Donwload
 			</a>
