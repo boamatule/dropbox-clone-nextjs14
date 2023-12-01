@@ -1,9 +1,10 @@
 import Header from "@/components/Header";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Toaster } from "react-hot-toast";
 import "./globals.css";
-import { ThemeProvider } from "@/components/ThemeProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,6 +30,8 @@ export default function RootLayout({
 					>
 						<Header />
 						{children}
+
+						<Toaster position="bottom-center"/>
 					</ThemeProvider>
 				</body>
 			</html>
